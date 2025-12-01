@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>RA Interativa - Parte 4</title>
+    <title>RA Interativa: Arena Corinthians</title>
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     
@@ -21,7 +21,7 @@
             padding: 12px 24px;
             border-radius: 8px;
             border: none;
-            background-color: #007bff; /* Azul profissional */
+            background-color: #007bff; /* Azul */
             color: white;
             font-size: 16px;
             font-weight: bold;
@@ -39,20 +39,21 @@
 <body style="margin : 0px; overflow: hidden;">
 
     <div class="botoes-container">
-        <button onclick="iniciarRotacao()">▶ Girar</button>
-        <button onclick="pararRotacao()" style="background-color: #dc3545;">⏹ Parar</button>
+        <button onclick="iniciarRotacao()">▶ Girar Arena</button>
+        <button onclick="pararRotacao()" style="background-color: #dc3545;">⏹ Parar Arena</button>
     </div>
 
     <a-scene embedded arjs>
         
         <a-marker preset="hiro">
-            <a-sphere id="meuGlobo" 
-                      position="0 0.5 0" 
-                      radius="0.6" 
-                      color="#4CC3D9" 
-                      wireframe="true"
-                      animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear; enabled: false">
-            </a-sphere>
+            
+            <a-gltf-model id="meuObjeto" 
+                          src="arena_corinthians.glb" 
+                          position="0 0.2 0" 
+                          scale="0.3 0.3 0.3" 
+                          rotation="0 0 0"
+                          animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear; enabled: false">
+            </a-gltf-model>
         </a-marker>
 
         <a-entity camera></a-entity>
@@ -61,22 +62,18 @@
     <script>
         // Função para iniciar a rotação
         function iniciarRotacao() {
-            var globo = document.querySelector('#meuGlobo');
-            // Definimos o atributo de animação como habilitado
-            globo.setAttribute('animation', 'enabled', 'true');
-            // Removemos o wireframe para parecer sólido ao ativar (efeito visual)
-            globo.setAttribute('wireframe', 'false');
-            globo.setAttribute('color', '#28a745'); // Muda cor para verde
+            // Usa o ID "meuObjeto" para controlar a arena
+            var arena = document.querySelector('#meuObjeto');
+            // Habilita a animação (rotação)
+            arena.setAttribute('animation', 'enabled', 'true');
         }
 
         // Função para parar a rotação
         function pararRotacao() {
-            var globo = document.querySelector('#meuGlobo');
-            // Definimos o atributo de animação como desabilitado
-            globo.setAttribute('animation', 'enabled', 'false');
-            // Voltamos ao estado original
-            globo.setAttribute('wireframe', 'true');
-            globo.setAttribute('color', '#dc3545'); // Muda cor para vermelho
+            // Usa o ID "meuObjeto" para controlar a arena
+            var arena = document.querySelector('#meuObjeto');
+            // Desabilita a animação (rotação)
+            arena.setAttribute('animation', 'enabled', 'false');
         }
     </script>
 </body>
