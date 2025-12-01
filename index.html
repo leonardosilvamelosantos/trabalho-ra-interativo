@@ -39,8 +39,8 @@
 <body style="margin : 0px; overflow: hidden;">
 
     <div class="botoes-container">
-        <button onclick="iniciarRotacao()">▶ Girar Arena</button>
-        <button onclick="pararRotacao()" style="background-color: #dc3545;">⏹ Parar Arena</button>
+        <button onclick="iniciarRotacao()">▶ Girar </button>
+        <button onclick="pararRotacao()" style="background-color: #dc3545;">⏹ Parar </button>
     </div>
 
     <a-scene embedded arjs>
@@ -48,9 +48,9 @@
         <a-marker preset="hiro">
             
             <a-gltf-model id="meuObjeto" 
-                          src="world_cup.glb" 
+                          src="arena_corinthians_itaquera.glb" 
                           position="0 0 0" 
-                          scale="0.3 0.3 0.3" 
+                          scale="0.03 0.03 0.03" 
                           rotation="0 0 0"
                           animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear; enabled: false">
             </a-gltf-model>
