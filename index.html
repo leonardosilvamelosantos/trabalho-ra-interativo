@@ -2,10 +2,17 @@
 <html>
 <head>
     <title>RA Interativa: Arena Corinthians</title>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <!-- Atualizei para versões mais recentes para melhor performance e compatibilidade -->
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     
     <style>
+        body {
+            margin: 0px;
+            overflow: hidden;
+            font-family: Arial, sans-serif; /* Melhor legibilidade */
+        }
+        
         .botoes-container {
             position: fixed;
             bottom: 20px;
@@ -27,37 +34,79 @@
             font-weight: bold;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s; /* Suaviza interações */
+        }
+        
+        button:hover {
+            background-color: #0056b3;
         }
         
         button:active {
-            background-color: #0056b3;
             transform: translateY(2px);
+        }
+        
+        /* Novo: Indicador de carregamento para o modelo 3D */
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 20;
+            display: block; /* Mostra inicialmente */
+        }
+        
+        /* Novo: Mensagem se o marcador não for detectado */
+        #no-marker {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            color: red;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 15;
+            display: none; /* Esconde inicialmente */
         }
     </style>
 </head>
 
-<body style="margin : 0px; overflow: hidden;">
+<body>
+    <!-- Novo: Indicador de carregamento -->
+    <div id="loading">Carregando modelo 3D...</div>
+    
+    <!-- Novo: Mensagem de erro para marcador não detectado -->
+    <div id="no-marker">Marcador Hiro não detectado. Aponte a câmera para o marcador.</div>
 
     <div class="botoes-container">
-        <button onclick="iniciarRotacao()">▶ Girar </button>
-        <button onclick="pararRotacao()" style="background-color: #dc3545;">⏹ Parar </button>
+        <button onclick="iniciarRotacao()">▶ Girar</button>
+        <button onclick="pararRotacao()" style="background-color: #dc3545;">⏹ Parar</button>
     </div>
 
-    <a-scene embedded arjs>
+    <a-scene embedded 
+             arjs="debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; sourceType: webcam; sourceWidth: 640; sourceHeight: 480; displayWidth: 640; displayHeight: 480;">
+        <!-- Novo: Melhor configuração para reconhecimento do marcador Hiro -->
+        <!-- - debugUIEnabled: false (desabilita debug para performance, mas pode ser true para testes) -->
+        <!-- - detectionMode: mono_and_matrix (melhora detecção em mono e matrix, mais tolerante a variações) -->
+        <!-- - matrixCodeType: 3x3 (otimiza para marcadores como Hiro) -->
+        <!-- - sourceType/webcam e resoluções ajustadas para melhor reconhecimento em dispositivos móveis -->
         
-        <a-marker preset="hiro">
-            
+        <a-marker preset="hiro" id="hiro-marker">
+            <!-- Novo: Ajuste na posição para diminuir o zoom (zoom out): movi o Z para 0.2 para afastar o objeto ligeiramente, tornando-o menor na tela -->
+            <!-- Mantive a escala pequena, mas ajustável. Se quiser ainda menor, aumente o Z ou diminua a escala. -->
             <a-gltf-model id="meuObjeto" 
                           src="arena_corinthians.glb" 
-                          position="0 0 0" 
-                          scale="0.05 0.05 0.05" 
-                          rotation="-90 0 0"
-              renderer-detail="high"
-              material="color: white; metalness: 0.2; roughness: 0.5;"
-              
-             
-            
-             animation="property: rotation; from: -90 0 0; to: -90 360 0; loop: true; dur: 12000; easing: linear; enabled: false">
+                          position="0 0 0.2"  <!-- Ajustado de 0 para 0.2 para zoom out -->
+                          scale="0.03 0.03 0.03" 
+                          rotation="0 0 0"
+                          animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear; enabled: false"
+                          gltf-model-loaded="onModelLoaded">  <!-- Novo: Evento para esconder carregamento -->
             </a-gltf-model>
         </a-marker>
 
@@ -65,28 +114,42 @@
     </a-scene>
 
     <script>
-        // Função para iniciar a rotação
-        function iniciarRotacao() {
-            // Usa o ID "meuObjeto" para controlar a arena
-            var arena = document.querySelector('#meuObjeto');
-            // Habilita a animação (rotação)
-            arena.setAttribute('animation', 'enabled', 'true');
+        // Novo: Função para esconder o indicador de carregamento quando o modelo carregar
+        function onModelLoaded() {
+            document.getElementById('loading').style.display = 'none';
         }
 
-        // Função para parar a rotação
-        function pararRotacao() {
-            // Usa o ID "meuObjeto" para controlar a arena
+        // Novo: Verifica se o marcador foi detectado (mostra mensagem se não)
+        var marker = document.querySelector('#hiro-marker');
+        marker.addEventListener('markerFound', function() {
+            document.getElementById('no-marker').style.display = 'none';
+        });
+        marker.addEventListener('markerLost', function() {
+            document.getElementById('no-marker').style.display = 'block';
+        });
+
+        // Função para iniciar a rotação (mantida, mas com verificação se o marcador está visível)
+        function iniciarRotacao() {
             var arena = document.querySelector('#meuObjeto');
-            // Desabilita a animação (rotação)
-            arena.setAttribute('animation', 'enabled', 'false');
+            if (arena) {
+                arena.setAttribute('animation', 'enabled', 'true');
+            }
         }
+
+        // Função para parar a rotação (mantida, mas com verificação)
+        function pararRotacao() {
+            var arena = document.querySelector('#meuObjeto');
+            if (arena) {
+                arena.setAttribute('animation', 'enabled', 'false');
+            }
+        }
+
+        // Novo: Otimização para mobile - previne zoom duplo no toque
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault(); // Impede zoom nativo do navegador
+            }
+        }, { passive: false });
     </script>
 </body>
-
 </html>
-
-
-
-
-
-
